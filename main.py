@@ -1,1 +1,1 @@
-git init mon_projet
+print('hello')
