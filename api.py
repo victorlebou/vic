@@ -1,5 +1,22 @@
-import argparse
-parser = argparse.ArgumentParser(description="Jeu Quoridor - phase 1")
-parser.add_argument('-l', '--lister', metavar='',help="Lister les identifiants de vos 20 dernières parties")
-parser.add_argument('identification', nargs='+', metavar= 'idul', help='IDUL du joueur')
-parser.parse_args()
+import requests
+
+url_base = 'https://python.gel.ulaval.ca/quoridor/api/'
+
+def lister_parties(identifiant):
+    rep = requests.get(url_base+'lister/', params={'idul': 'identifiant'})
+    if rep.status_code == 200:
+        parties = rep.json()
+    else:
+        raise RuntimeError
+    return parties
+    
+def débuter_partie(identifiant):
+    rep = requests.post(url_base+'débuter/', data={'idul': 'identifiant'})
+    if rep.status_code == 200:
+        idetat = rep.json()
+    else:
+        raise RuntimeError
+    return (idetat()['id'], idetat()['état'])
+
+if __name__ == "__main__":
+    print(débuter_partie(''))
