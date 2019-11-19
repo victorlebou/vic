@@ -1,9 +1,9 @@
+""" importe les modules nécessaires aux trois fonctions """
 import argparse
 
 from api import lister_parties, débuter_partie, jouer_coup
 
 def analyser_commande():
-    idul = input('Entrez votre idul')
     parser = argparse.ArgumentParser(description="Jeu Quoridor - phase 1")
     parser.add_argument('-l', '--lister', metavar='',help="Lister les identifiants de vos 20 dernières parties")
     parser.add_argument('idul', help='IDUL du joueur')
@@ -13,6 +13,7 @@ def afficher_damier_ascii(dico):
     nom1 = str(dico['joueurs'][0]['nom'])
     nom2 = str(dico['joueurs'][1]['nom'])
     print(f"Légende : 1={nom1}, 2={nom2}")
+    print('   -----------------------------------')
     damier1 = [[' ' for i in range(39)] for j in range(17)]
     for i, j in enumerate(damier1[::2]):
         j[0] = str(9 - i)
@@ -32,14 +33,40 @@ def afficher_damier_ascii(dico):
     liste[joueur2] = str(2)
     horizontaux = dico["murs"]["horizontaux"]
     for j in horizontaux:
-         x = int(j[0])
-         y = int(j[1])
-        for i in range(7):
-            liste[40*(18 - 2*y) + 4*x + 39 + i] = '-'
+         x = (j[0])
+         y = (j[1])
+         for i in range(7):
+             liste[40*(18 - 2*y) + 4*x + 39 + i] = '-'
     verticaux = dico["murs"]["verticaux"]
     for j in verticaux:
-        x = int(j[0])
-        y = int(j[1])
-        liste[40*(18 - 2*y) + 4*x - 2] = liste[40*(18 - 2*y) + 4*x - 42] =  liste[40*(18 - 2*y) + 4*x - 82]
-    chaine = ''.join(liste2)
+        x = (j[0])
+        y = (j[1])
+        liste[40*(18 - 2*y) + 4*x - 2] = liste[40*(18 - 2*y) + 4*x - 42] =  liste[40*(18 - 2*y) + 4*x - 82] = '|'
+    liste.pop()
+    chaine = ''.join(liste)
     print(chaine)
+    print('--|-----------------------------------')
+    print('  | 1   2   3   4   5   6   7   8   9')
+
+d = débuter_partie(analyser_commande().idul)
+if len(d) > 1:
+    a = d[1]
+    afficher_damier_ascii(a)
+    gagnant = True
+    while gagnant: 
+        type_cout = input('Entrez le coup que vous voulez faire ')
+        position = input('Entrez la position ') 
+        e = jouer_coup(d[0], type_cout, position)
+        if e.get('message'):
+            afficher_damier_ascii(a)
+            print(e['message'])
+        elif e.get('gagnant'):
+            gagnant = False
+            winner = e['gagnant']
+            print(f"Le gagnant est : {winner}")
+        else:
+            a = e['état']
+            afficher_damier_ascii(a)
+
+else:
+    print(d['message'])

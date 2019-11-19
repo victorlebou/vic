@@ -1,11 +1,12 @@
 import requests
 
-idul = input('Saisir votre IDUL')
+IDUL = input('Saisir votre identifiant (IDUL)')
 
-url_base = 'https://python.gel.ulaval.ca/quoridor/api/'
+URL = 'https://python.gel.ulaval.ca/quoridor/api/'
 
-def lister_parties(idul):
-    rep = requests.get(url_base+'lister/', params={'idul': idul})
+def lister_parties(IDUL):
+    """ Fait une liste de toutes les anciennes parties """
+    rep = requests.get(URL+'lister/', params={'idul': IDUL})
     game = []
     if rep.status_code == 200:
         game = game + rep.json()
@@ -14,20 +15,28 @@ def lister_parties(idul):
     return game
     
 def débuter_partie(idul):
-    rep = requests.post(url_base+'débuter/', data={'idul': idul})
-    if rep.status_code == 200:
-        x = rep.json()
-    else:
-        raise RuntimeError
-    return (x()['id'], x()['état'])
+    """ permet de débuter la partie """
+    rep = requests.post(URL+'débuter/', data={'idul': IDUL})
+    try:
+        if rep.json().get('message'):
+            raise RuntimeError
+        else:
+            return rep.json()['id'], rep.json()['état']
+    except RuntimeError:
+        return rep.json()
 
 def jouer_coup(id_partie, type_coup, position):
-    rep = requests.post(url_base+'jouer/', data={'id': id_partie, 'type':type_coup, 'pos':position})
+    """fonction qui exécute les coups des joueurs """
+    rep = requests.post(URL+'jouer/', data={'id': id_partie, 'type':type_coup, 'pos':position})
     y = rep.json()
-    if rep.status_code == 200:
-        if 'gagnant' in y:
-            return y['gagnant']
+    try:
+        if y.get('gagnant'):
+            raise StopIteration
+        elif y.get('message'):
+            raise RuntimeError
         else:
-            return y['état']
-    else:
-        raise RuntimeError(y['message'])
+            return rep.json()
+    except StopIteration:
+        return y
+    except RuntimeError:
+        return y
