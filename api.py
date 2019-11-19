@@ -1,22 +1,33 @@
 import requests
 
+idul = input('Saisir votre IDUL')
+
 url_base = 'https://python.gel.ulaval.ca/quoridor/api/'
 
-def lister_parties(identifiant):
-    rep = requests.get(url_base+'lister/', params={'idul': 'identifiant'})
+def lister_parties(idul):
+    rep = requests.get(url_base+'lister/', params={'idul': idul})
+    game = []
     if rep.status_code == 200:
-        parties = rep.json()
+        game = game + rep.json()
     else:
         raise RuntimeError
-    return parties
+    return game
     
-def débuter_partie(identifiant):
-    rep = requests.post(url_base+'débuter/', data={'idul': 'identifiant'})
+def débuter_partie(idul):
+    rep = requests.post(url_base+'débuter/', data={'idul': idul})
     if rep.status_code == 200:
-        idetat = rep.json()
+        x = rep.json()
     else:
         raise RuntimeError
-    return (idetat()['id'], idetat()['état'])
+    return (x()['id'], x()['état'])
 
-if __name__ == "__main__":
-    print(débuter_partie(''))
+def jouer_coup(id_partie, type_coup, position):
+    rep = requests.post(url_base+'jouer/', data={'id': id_partie, 'type':type_coup, 'pos':position})
+    y = rep.json()
+    if rep.status_code == 200:
+        if 'gagnant' in y:
+            return y['gagnant']
+        else:
+            return y['état']
+    else:
+        raise RuntimeError(y['message'])
